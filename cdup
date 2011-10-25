@@ -1,0 +1,34 @@
+#!/bin/bash
+# Usage: cdup [DIRNAME]
+# Bash shortcut function to cd you to ancestor directory named as first argument. 
+# If DIRNAME is not supplied, then .. is used.
+# Stop having to cd ../../../..
+# Use `cd -` to undo, to restore old working directory. 
+# Use aliases for common directories, like: alias docroot="cdup docroot".
+# Add function to your ~/.profile
+# 
+# Example:
+# $ pwd
+# > /var/www/html/example.com/docroot/long/path/to/something
+# $ cdup html
+# $ pwd
+# > /var/www/html
+# $ cd -
+# $ pwd
+# > /var/www/html/example.com/docroot/long/path/to/something
+
+function cdup {
+  if [ $# == 0 ]; then
+    cd ..
+    return 0
+  fi
+  
+  dir="$1"
+  old=`pwd`
+  new=`sed s:$dir/.*:$dir: <<< $old`
+  if [ "$old" == "$new" ]; then
+    echo "Can't find '$dir' among ancestor directories." 1>&2
+    return 1
+  fi
+  cd $new
+}
