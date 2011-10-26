@@ -55,7 +55,7 @@ statements.append(sql)
 sql = "CREATE USER '%s'@'%s' IDENTIFIED BY '%s'" % (
     args.username,
     args.server,
-    args.password.replace("'", r"\'")
+    args.password.replace("'", r"\'") # @todo This needs to be more robust
 )
 statements.append(sql)
 
