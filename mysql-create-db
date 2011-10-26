@@ -1,0 +1,70 @@
+#!/usr/bin/env python
+# @author Weston Ruter (@westonruter), X-Team
+
+import argparse
+parser = argparse.ArgumentParser(
+    description='Generate the MySQL commands for creating a database and a new user for it.',
+    epilog='Then you may pipe the output into `mysql -u root -p` or into `pbcopy` for pasting into the SQL tab in phpMyAdmin.'
+)
+parser.add_argument('-s', '--server',
+    metavar='HOST',
+    type=str,
+    default='localhost',
+    help="The server (i.e. host) for the DB"
+)
+parser.add_argument('-d', '--database',
+    metavar='DB',
+    type=str,
+    required=True,
+    help="The name for the DB"
+)
+parser.add_argument('-u', '--username',
+    metavar='USER',
+    type=str,
+    required=True,
+    help="The new user's username"
+)
+parser.add_argument('-p', '--password',
+    metavar='PASS',
+    type=str,
+    default='',
+    help="The new user's password"
+)
+parser.add_argument('-c', '--charset',
+    metavar='CHARSET',
+    type=str,
+    default='utf8',
+    help="The charset for the DB"
+)
+
+args = parser.parse_args()
+
+statements = []
+
+# Create database
+sql = "CREATE DATABASE `%s`" % args.database
+sql += " CHARACTER SET %s" % args.charset
+sql += ';'
+statements.append(sql)
+
+# Use the database
+sql = "USE `%s`" % args.database
+statements.append(sql)
+
+# Create user
+sql = "CREATE USER '%s'@'%s' IDENTIFIED BY '%s'" % (
+    args.username,
+    args.server,
+    args.password.replace("'", r"\'")
+)
+statements.append(sql)
+
+# Grant users
+sql = "GRANT ALL PRIVILEGES ON `%s`.* TO '%s'@'%s'" % (
+    args.database,
+    args.username,
+    args.server
+);
+statements.append(sql)
+
+print "\n".join(statements)
