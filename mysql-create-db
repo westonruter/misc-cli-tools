@@ -42,17 +42,17 @@ args = parser.parse_args()
 statements = []
 
 # Create database
-sql = "CREATE DATABASE `%s`" % args.database
+sql = "CREATE DATABASE IF NOT EXISTS `%s`" % args.database
 sql += " CHARACTER SET %s" % args.charset
 sql += ';'
 statements.append(sql)
 
 # Use the database
-sql = "USE `%s`" % args.database
+sql = "USE `%s`;" % args.database
 statements.append(sql)
 
 # Create user
-sql = "CREATE USER '%s'@'%s' IDENTIFIED BY '%s'" % (
+sql = "CREATE USER '%s'@'%s' IDENTIFIED BY '%s';" % (
     args.username,
     args.server,
     args.password.replace("'", r"\'") # @todo This needs to be more robust
@@ -60,7 +60,7 @@ sql = "CREATE USER '%s'@'%s' IDENTIFIED BY '%s'" % (
 statements.append(sql)
 
 # Grant users
-sql = "GRANT ALL PRIVILEGES ON `%s`.* TO '%s'@'%s'" % (
+sql = "GRANT ALL PRIVILEGES ON `%s`.* TO '%s'@'%s';" % (
     args.database,
     args.username,
     args.server
