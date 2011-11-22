@@ -8,6 +8,6 @@ else
   cwd="$1"
 fi
 
-rev=`svn info | perl -e '(join "\n", <>) =~ /Revision:\s*(\d+)/; print "$1";'`
+rev=`svn info $cwd | perl -e '(join "\n", <>) =~ /Revision:\s*(\d+)/; print "$1";'`
 echo $rev | perl -e 'while(<>){ chomp; print; }' | pbcopy
 echo $rev
