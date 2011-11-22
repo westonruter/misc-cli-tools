@@ -1,0 +1,13 @@
+#!/bin/bash
+# Prints and copies to the clipboard the SVN Revision number of the current
+# working directory or the first command line argument
+
+if [ $# == 0 ]; then
+  cwd=`pwd`
+else
+  cwd="$1"
+fi
+
+rev=`svn info | perl -e '(join "\n", <>) =~ /Revision:\s*(\d+)/; print "$1";'`
+echo $rev | perl -e 'while(<>){ chomp; print; }' | pbcopy
+echo $rev

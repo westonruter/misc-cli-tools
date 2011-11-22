@@ -1,0 +1,13 @@
+#!/bin/bash
+# Prints and copies to the clipboard the SVN URL of the current working
+# directory or the first command line argument
+
+if [ $# == 0 ]; then
+  cwd=`pwd`
+else
+  cwd="$1"
+fi
+
+url=`svn info | perl -e '(join "\n", <>) =~ /URL:\s*(.+)/; print "$1";'`
+echo $url | perl -e 'while(<>){ chomp; print; }' | pbcopy
+echo $url
