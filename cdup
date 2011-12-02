@@ -1,12 +1,16 @@
 #!/bin/bash
 # Usage: cdup [DIRNAME]
+# Author: Weston Ruter (@westonruter) <http://weston.ruter.net/>
+# URL: https://github.com/westonruter/misc-cli-tools/blob/master/cdup
+# See also: https://github.com/westonruter/misc-cli-tools/blob/master/cddown
+# 
 # Bash shortcut function to cd you to ancestor directory named as first argument. 
 # If DIRNAME is not supplied, then .. is used.
 # Stop having to cd ../../../..
 # Use `cd -` to undo, to restore old working directory. 
 # Use aliases for common directories, like: alias docroot="cdup docroot".
 # Add function to your ~/.profile
-# 
+#
 # Example:
 # $ pwd
 # > /var/www/html/example.com/docroot/long/path/to/something
@@ -18,6 +22,9 @@
 # > /var/www/html/example.com/docroot/long/path/to/something
 
 function cdup {
+  
+  # TODO: Allow an integer parameter to define the number of levels to jump up; allow it to be used with a named arg
+  
   if [ $# == 0 ]; then
     cd ..
     return 0

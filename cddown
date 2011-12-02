@@ -1,0 +1,49 @@
+#!/bin/bash
+# Usage: cddown DIRNAME
+# Author: Weston Ruter (@westonruter) <http://weston.ruter.net/>
+# URL: https://github.com/westonruter/misc-cli-tools/blob/master/cddown
+# See also: https://github.com/westonruter/misc-cli-tools/blob/master/cdup
+# 
+# Bash shortcut function to cd you to any descendent directory named (or patterned)
+# as first argument. Stop wearing out your tab-completion key!
+# Uses find command and only uses first matching result.
+# Use `cd -` to undo, to restore old working directory. 
+# Use aliases for common directories, like: alias wp-content="cddown docroot".
+# Add function (or source this file) in your ~/.profile
+# 
+# Example, given that /var/www/html/example.com/docroot/about/awesome exists:
+# $ pwd
+# > /var
+# $ cddown awesome
+# $ pwd
+# > /var/www/html/example.com/docroot/about/awesome
+# $ cd -
+# $ pwd
+# > /var
+
+function cddown {
+  
+  if [[ $# != 1 ]]; then
+    echo "You must supply one directory name argument." 1>&2
+    return 1
+  fi
+  
+  # First try exact match
+  dir=`find . -type d -name $1 -print -quit`
+  
+  # If exact match failed, try supplying wildcards
+  if [[ ! $dir ]]; then
+    dir=`find . -type d -name \*$1\* -print -quit`
+  fi
+  
+  # This is not the directory you are looking for!
+  if [[ ! $dir ]]; then
+    echo "Couldn't find any directory named '$1'" 1>&2
+    return 1
+  fi
+  
+  echo $dir
+  cd $dir
+}
+
+alias cdd="cddown"
