@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+# Pipe through to remove trailing whitespace
+# Example: pwd | chomp | pbcopy
+# @author Weston Ruter (@westonruter) http://weston.ruter.net/
 
 import sys
 sys.stdout.write(sys.stdin.read().rstrip())
