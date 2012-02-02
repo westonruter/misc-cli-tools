@@ -7,6 +7,7 @@
 # Bash shortcut function to cd you to ancestor directory named as first argument. 
 # If DIRNAME is not supplied, then .. is used.
 # Stop having to cd ../../../..
+# Also supports substring matches for ancestor directory names.
 # Use `cd -` to undo, to restore old working directory. 
 # Use aliases for common directories, like: alias docroot="cdup docroot".
 # Add function to your ~/.profile
@@ -20,6 +21,9 @@
 # $ cd -
 # $ pwd
 # > /var/www/html/example.com/docroot/long/path/to/something
+# $ cdup example
+# $ pwd
+# > /var/www/html/example.com
 
 function cdup {
   
@@ -32,10 +36,20 @@ function cdup {
   
   dir="$1"
   old=`pwd`
-  new=`sed s:$dir/.*:$dir: <<< $old`
+  
+  # Try matching the full segment in path name
+  new=`sed s:/\($dir\)/.*:/\1: <<< $old`
+  
+  # If failed, try partial match of segment
+  if [ "$old" == "$new" ]; then
+    new=`sed "s:/\([^/]*$dir[^/]*\)/.*:/\1:" <<< $old`
+  fi
+  
+  # No replacements done, so we failed
   if [ "$old" == "$new" ]; then
     echo "Can't find '$dir' among ancestor directories." 1>&2
     return 1
   fi
+  
   cd $new
 }
