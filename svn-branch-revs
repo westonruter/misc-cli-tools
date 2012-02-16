@@ -1,0 +1,76 @@
+#!/usr/bin/env python
+# List SVN revision numbers for a branch
+# by @westonruter
+
+import sys
+import re
+import argparse
+from xml.dom import minidom
+import subprocess
+
+# Get the svn info and orient ourselves
+info_xml = subprocess.check_output(['svn', 'info', '--xml'])
+info_dom = minidom.parseString(info_xml)
+working_directory_url = info_dom.getElementsByTagName('url')[0].firstChild.data
+default_branch = None
+branch_root_url = None
+matches = re.match(r'(^.+?)/trunk/', working_directory_url)
+if matches:
+    branch_root_url = matches.group(1) + '/branches'
+else:
+    matches = re.match(r'(^.+?/branches)/(.+?)/', working_directory_url)
+    if matches:
+        branch_root_url = matches.group(1)
+        default_branch = matches.group(2)
+
+# Parse additional options from command line
+parser = argparse.ArgumentParser(
+    description='Obtain all svn revision numbers for branch (in ascending order)',
+    epilog='(Runs svn-log with --stop-on-copy)'
+)
+parser.add_argument('-s',
+    default=False,
+    action='store_true',
+    help='Separate revisions by spaces (all on single line) instead of a newlines'
+)
+parser.add_argument('branch',
+    metavar='BRANCH',
+    type=str,
+    nargs='?',
+    default=default_branch,
+    help='Target branch (defaults to WC, here "%s")' % (default_branch)
+)
+# In the future, might be nice to supply a path or use the current working directory to subset the revs
+#parser.add_argument('-p', '--path',
+#    metavar='PATH',
+#    type=str,
+#    nargs='?',
+#    default=None,
+#    help="Only retrieve revs affecting a path within the branch (defaults to branch root)"
+#)
+args = parser.parse_args()
+
+assert branch_root_url is not None, "Unable to find SVN branch root URL"
+assert args.branch is not None, "Unable to find SVN branch; provide it as an argument"
+
+
+# Get the svn log for branch and parse out the revs
+branch_url = branch_root_url + '/' + args.branch
+sys.stderr.write("Branch for revs: %s\n" % args.branch)
+sys.stderr.write("Branch URL: %s\n" % branch_url)
+
+log_xml = subprocess.check_output(['svn', 'log', '--stop-on-copy', '--xml', branch_url])
+log_dom = minidom.parseString(log_xml)
+revs = []
+for logentry in log_dom.getElementsByTagName('logentry'):
+    rev = logentry.getAttribute('revision')
+    message = logentry.getElementsByTagName('msg')[0].firstChild.data
+    sys.stderr.write("  r%s: %s\n" % (rev, message))
+    revs.append(rev)
+
+if args.s:
+    separator = " "
+else:
+    separator = "\n"
+
+print separator.join(sorted(revs))
