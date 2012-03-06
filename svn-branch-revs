@@ -14,7 +14,7 @@ info_dom = minidom.parseString(info_xml)
 working_directory_url = info_dom.getElementsByTagName('url')[0].firstChild.data
 default_branch = None
 branch_root_url = None
-matches = re.match(r'(^.+?)/trunk/', working_directory_url)
+matches = re.match(r'(^.+?)/(trunk|branches|tags)/', working_directory_url)
 if matches:
     branch_root_url = matches.group(1) + '/branches'
 else:
