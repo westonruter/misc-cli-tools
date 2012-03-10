@@ -1,0 +1,67 @@
+#!/usr/bin/env python
+# @author Weston Ruter (@westonruter) <http://weston.ruter.net/>
+
+import subprocess
+import argparse
+import time
+import sys
+from xml.dom import minidom
+
+parser = argparse.ArgumentParser(
+    description='Get notified of new SVN commits for a given directory via Growl'
+)
+parser.add_argument('-i', '--interval',
+    metavar='INTERVAL',
+    type=int,
+    default=10,
+    help="Poll interval, default=10 (seconds)"
+)
+parser.add_argument('-v', '--verbose',
+    default=False,
+    action='store_true',
+    help="Show verbose log entries in Growl"
+)
+parser.add_argument('path',
+    metavar='path',
+    type=str,
+    nargs='?',
+    default='.',
+    help='Path to check for updates; defaults to cwd'
+)
+args = parser.parse_args()
+
+# Get initial revision to poll against
+log_xml = subprocess.check_output(['svn', 'log', '-r', 'HEAD:1', '-l', '1', '--xml', args.path])
+log_doc = minidom.parseString(log_xml)
+logentry = log_doc.getElementsByTagName('logentry')[0]
+latest_rev = int(logentry.getAttribute('revision'))
+
+print "Last commit was r{rev} from {author}: {msg}".format(
+    rev=latest_rev,
+    author=logentry.getElementsByTagName('author')[0].firstChild.data,
+    msg=logentry.getElementsByTagName('msg')[0].firstChild.data
+)
+print "Polling for new commits every %d seconds..." % args.interval
+
+
+# Poll at the interval for new revisions
+while True:
+    time.sleep(args.interval)
+    try:
+        log_xml = subprocess.check_output(['svn', 'log', '-r', str(latest_rev)+':HEAD', '--xml', args.path])
+        log_doc = minidom.parseString(log_xml)
+        for logentry in (log_doc.getElementsByTagName('logentry')):
+            rev = int(logentry.getAttribute('revision'))
+            if rev != latest_rev:
+                latest_rev = max(rev, latest_rev)
+                log_txt = subprocess.check_output(['svn', 'log', '-r', str(rev), '--verbose', '--incremental', args.path])
+                if args.verbose:
+                    sys.stdout.write('\033]9;%s\007' % log_txt)
+                else:
+                    sys.stdout.write('\033]9;%s\007' % logentry.getElementsByTagName('msg')[0].firstChild.data)
+                print log_txt
+    except:
+        # @todo print red color
+        print sys.exc_info()[0], sys.exc_info()[1]
+
+
