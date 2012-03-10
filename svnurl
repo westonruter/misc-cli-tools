@@ -8,6 +8,6 @@ else
   cwd="$1"
 fi
 
-url=`svn info $cwd | perl -e '(join "\n", <>) =~ /URL:\s*(.+)/; print "$1";'`
-echo $url | perl -e 'while(<>){ chomp; print; }' | pbcopy
+url=`svn info "$cwd" | grep 'URL:' | awk '{print $2}'`
+echo $url | tr -d '\n' | pbcopy
 echo $url
