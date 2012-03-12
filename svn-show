@@ -1,0 +1,15 @@
+#!/bin/bash
+# Show the verbose log entry for a given revision (defaulting to latest)
+# followed by a diff. Inspired by git-show
+# @author Weston Ruter (@westonruter) <http://weston.ruter.net/>
+
+if [ $# -eq 0  ]; then
+    rev=`svn info | egrep "^Revision:" | cut -c11-`
+else
+    rev=$1
+fi
+
+let prev_rev=$rev-1
+
+svn log -r $rev --verbose
+svn diff -r $prev_rev:$rev
