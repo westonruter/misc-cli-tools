@@ -7,6 +7,9 @@
 # Load this file in your .bashrc/.profile:
 # source ~/bash_completion_svn_switch.sh
 #
+# For general SVN Bash tab completion, see a script like:
+# http://worksintheory.org/files/misc/bash_completion_svn
+#
 # Usage:
 # $ svn-switch <tab>
 # > (all branches, tas, and trunk)
