@@ -7,6 +7,12 @@
 #
 # Best if used with svn-switch bash completion:
 # https://github.com/westonruter/misc-cli-tools/blob/master/bash_completion_svn_switch.sh
+#
+# Usage:
+# $ svn-switch trunk
+# $ svn-switch food-branch
+# $ svn-switch tags/bard-1.0
+# $ svn-switch branches/food-branch
 
 import os
 import argparse
