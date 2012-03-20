@@ -1,0 +1,71 @@
+#!/usr/bin/env python
+# Easily switch between branches and trunk in Subversion
+# @author Weston Ruter (@westonruter)
+
+import os
+import argparse
+import re
+import subprocess
+import sys
+import time
+from xml.dom import minidom
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='Easily switch between branches and trunk in Subversion; switch is made to root of checkout'
+    )
+    parser.add_argument('name',
+        metavar='NAME',
+        action='store',
+        nargs=1,
+        type=str,
+        help='Name of branch or "trunk"'
+    )
+    args = parser.parse_args()
+    name = args.name[0] # @todo How can we get args.name to not be a list?
+
+    # Get the root of the current working copy directory
+    svn_url = get_svn_url_for_directory('.')
+    (repo_root, repo_base, repo_subdir) = get_repo_paths_from_svn_url(svn_url)
+
+    # Take the current working directory and walk up it until we find the highest common directory
+    cwd_path = os.path.realpath('.').rstrip('/').split('/')
+    repo_path = repo_subdir.rstrip('/').split('/')
+    rel_base_path = ['.']
+    while True:
+        if len(cwd_path) == 0 or len(repo_path) == 0:
+            break
+        elif repo_path[-1] != cwd_path[-1]:
+            break
+        elif not os.path.exists('/'.join(rel_base_path) + '/.svn'):
+            break
+        repo_path.pop()
+        cwd_path.pop()
+        rel_base_path.append('..')
+
+    if name == 'trunk':
+        switch_url = repo_root + '/trunk'
+    else:
+        switch_url = repo_root + '/branches/' + name
+
+    cmd = ['svn', 'switch', switch_url, os.path.realpath('/'.join(rel_base_path))]
+    print '$ %s' % ' '.join(cmd)
+    print '# You have 3 seconds to abort...'
+    time.sleep(3)
+    subprocess.check_call(cmd)
+
+
+def get_svn_url_for_directory(dir):
+    info_xml = subprocess.check_output(['svn', 'info', '--xml', dir])
+    info_doc = minidom.parseString(info_xml)
+    return info_doc.getElementsByTagName('url')[0].firstChild.data
+
+def get_repo_paths_from_svn_url(svn_url):
+    matches = re.match(r'(.+?)/(trunk|branches/[^/]+|tags/[^/]+)(?=/|$)(.*)', svn_url)
+    if not matches:
+        raise Exception('Failed to find the repo root from the current WC URL.')
+    return (matches.group(1), matches.group(2), matches.group(3))
+
+
+if __name__ == '__main__':
+    main()
