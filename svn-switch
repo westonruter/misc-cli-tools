@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # Easily switch between branches and trunk in Subversion
-# @author Weston Ruter (@westonruter)
+# Weston Ruter (@westonruter)
+# https://github.com/westonruter/misc-cli-tools/blob/master/svn-switch
 
 import os
 import argparse
@@ -19,7 +20,7 @@ def main():
         action='store',
         nargs=1,
         type=str,
-        help='Name of branch or "trunk"'
+        help='Name of branch or "trunk" or another root-relative path like tags/foo or branches/bar'
     )
     args = parser.parse_args()
     name = args.name[0] # @todo How can we get args.name to not be a list?
@@ -45,6 +46,8 @@ def main():
 
     if name == 'trunk':
         switch_url = repo_root + '/trunk'
+    elif '/' in name:
+        switch_url = repo_root + '/' + name
     else:
         switch_url = repo_root + '/branches/' + name
 
