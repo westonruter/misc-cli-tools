@@ -1,7 +1,12 @@
 #!/usr/bin/env python
-# Easily switch between branches and trunk in Subversion
-# Weston Ruter (@westonruter)
-# https://github.com/westonruter/misc-cli-tools/blob/master/svn-switch
+# Easily switch between tunk, branches, and tags  in Subversion (SVN)
+# Provide just "trunk" to switch the root of your checkout, or provide a branch
+# name, or provide a relative path to switch the root to, e.g. 'tags/v1.2'
+# by Weston Ruter (@westonruter), X-Team <http://x-team.com/>
+# URL: https://github.com/westonruter/misc-cli-tools/blob/master/svn-switch
+#
+# Best if used with svn-switch bash completion:
+# https://github.com/westonruter/misc-cli-tools/blob/master/bash_completion_svn_switch.sh
 
 import os
 import argparse
