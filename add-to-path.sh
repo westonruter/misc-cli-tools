@@ -6,7 +6,7 @@
 # Bash function to prepend the current working directory or the path supplied
 # (as the first argument) to the PATH environment variable in the current sesson.
 # source this file in your .profile, e.g.:
-# source ~/bin/functions/add-to-path
+# source ~/bin/functions/add-to-path.sh
 
 function add-to-path {
   if [ $# == 0 ]; then
