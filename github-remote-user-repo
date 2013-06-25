@@ -1,0 +1,12 @@
+#!/bin/bash
+# Get the account/repo name from a given remote
+
+remote=$1
+if [ -z "$remote" ]; then
+    remote=origin
+fi
+
+git_url=$(git config remote.$remote.url)
+web_url=${git_url%.git}
+web_url=${web_url#git@github.com:}
+echo -n $web_url
